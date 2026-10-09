@@ -1,0 +1,6 @@
+alias bat='bat --theme "Monokai Extended Light"'
+alias diff='diff -c'
+alias gpgc='gpg --symmetric --personal-cipher-preferences AES256 --personal-digest-preferences SHA512 --no-symkey-cache'
+alias gpgd='gpg --decrypt --no-symkey-cache'
+alias gpgv='gpg --verify'
+alias ping='ping -c 5'

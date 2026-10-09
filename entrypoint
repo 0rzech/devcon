@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [[ '0' != "${DEVCON_USE_PROXY:-0}" ]]; then
+  echo 'Starting tinyproxy'
+  tinyproxy -c '/etc/tinyproxy/tinyproxy.conf'
+  export NO_PROXY='localhost,127.0.0.1,::1'
+  export HTTP_PROXY='http://127.0.0.1:8888'
+  export HTTPS_PROXY="${HTTP_PROXY}"
+fi
+
+if [[ ! -e "${HOME}/.skel" ]]; then
+  echo 'Copying skel'
+  cp --recursive --verbose '/etc/skel/.' "${HOME}"
+  touch "${HOME}/.skel"
+fi
+
+if [[ -z "$(git config --global core.editor || true)" ]]; then
+  echo 'Setting git core editor'
+  git config --global core.editor 'vim'
+fi
+
+if [[ -z "$(git config --global user.name || true)" ]]; then
+  echo 'Setting git user name'
+  git config --global user.name "$(bat --plain '/run/secrets/git-user-name')"
+fi
+
+if [[ -z "$(git config --global user.email || true)" ]]; then
+  echo 'Setting git user email'
+  git config --global user.email "$(bat --plain '/run/secrets/git-user-email')"
+fi
+
+if [[ -z "$(git config --global credential.helper || true)" ]]; then
+  echo 'Setting git credential helper'
+  git config --global credential.helper 'store'
+fi
+
+if [[ ! -d "${DEVCON_WORK_DIR}" ]]; then
+  git clone "${DEVCON_GIT_REPO}" "${DEVCON_WORK_DIR}"
+fi
+
+pass=$(head --bytes 48 '/dev/urandom' | base64)
+sed -i "s|^password:.*\$|password: '${pass}'|" "${HOME}/.config/code-server/config.yaml"
+
+echo
+echo '<<< DEVCON >>>'
+echo
+echo "${DEVCON_BASE_URL}?folder=${HOME}/${DEVCON_WORK_DIR}"
+echo
+echo "${pass}"
+echo
+echo '<<< ====== >>>'
+echo
+
+exec "${@}"

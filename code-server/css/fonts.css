@@ -1,0 +1,151 @@
+@font-face {
+    font-family: "Fira Code";
+    src: url("/static/out/media/fonts/FiraCode-Light.woff2") format("woff2");
+    font-weight: 300;
+    font-style: normal;
+    font-display: auto;
+}
+
+@font-face {
+    font-family: "Fira Code";
+    src: url("/static/out/media/fonts/FiraCode-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: auto;
+}
+
+@font-face {
+    font-family: "Fira Code";
+    src: url("/static/out/media/fonts/FiraCode-Medium.woff2") format("woff2");
+    font-weight: 500;
+    font-style: normal;
+    font-display: auto;
+}
+
+@font-face {
+    font-family: "Fira Code";
+    src: url("/static/out/media/fonts/FiraCode-SemiBold.woff2") format("woff2");
+    font-weight: 600;
+    font-style: normal;
+    font-display: auto;
+}
+
+@font-face {
+    font-family: "Fira Code";
+    src: url("/static/out/media/fonts/FiraCode-Bold.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: auto;
+}
+
+@font-face {
+    font-family: "Source Code Pro";
+    src: url("/static/out/media/fonts/SourceCodePro-ExtraLight.otf.woff2") format("woff2");
+    font-weight: 200;
+    font-style: normal;
+    font-display: auto;
+}
+
+@font-face {
+    font-family: "Source Code Pro";
+    src: url("/static/out/media/fonts/SourceCodePro-ExtraLightIt.otf.woff2") format("woff2");
+    font-weight: 200;
+    font-style: italic;
+    font-display: auto;
+}
+
+@font-face {
+    font-family: "Source Code Pro";
+    src: url("/static/out/media/fonts/SourceCodePro-Light.otf.woff2") format("woff2");
+    font-weight: 300;
+    font-style: normal;
+    font-display: auto;
+}
+
+@font-face {
+    font-family: "Source Code Pro";
+    src: url("/static/out/media/fonts/SourceCodePro-LightIt.otf.woff2") format("woff2");
+    font-weight: 300;
+    font-style: italic;
+    font-display: auto;
+}
+
+@font-face {
+    font-family: "Source Code Pro";
+    src: url("/static/out/media/fonts/SourceCodePro-Regular.otf.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: auto;
+}
+
+@font-face {
+    font-family: "Source Code Pro";
+    src: url("/static/out/media/fonts/SourceCodePro-It.otf.woff2") format("woff2");
+    font-weight: 400;
+    font-style: italic;
+    font-display: auto;
+}
+
+@font-face {
+    font-family: "Source Code Pro";
+    src: url("/static/out/media/fonts/SourceCodePro-Medium.otf.woff2") format("woff2");
+    font-weight: 500;
+    font-style: normal;
+    font-display: auto;
+}
+
+@font-face {
+    font-family: "Source Code Pro";
+    src: url("/static/out/media/fonts/SourceCodePro-MediumIt.otf.woff2") format("woff2");
+    font-weight: 500;
+    font-style: italic;
+    font-display: auto;
+}
+
+@font-face {
+    font-family: "Source Code Pro";
+    src: url("/static/out/media/fonts/SourceCodePro-Semibold.otf.woff2") format("woff2");
+    font-weight: 600;
+    font-style: normal;
+    font-display: auto;
+}
+
+@font-face {
+    font-family: "Source Code Pro";
+    src: url("/static/out/media/fonts/SourceCodePro-SemiboldIt.otf.woff2") format("woff2");
+    font-weight: 600;
+    font-style: italic;
+    font-display: auto;
+}
+
+@font-face {
+    font-family: "Source Code Pro";
+    src: url("/static/out/media/fonts/SourceCodePro-Bold.otf.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: auto;
+}
+
+@font-face {
+    font-family: "Source Code Pro";
+    src: url("/static/out/media/fonts/SourceCodePro-BoldIt.otf.woff2") format("woff2");
+    font-weight: 700;
+    font-style: italic;
+    font-display: auto;
+}
+
+@font-face {
+    font-family: "Source Code Pro";
+    src: url("/static/out/media/fonts/SourceCodePro-Black.otf.woff2") format("woff2");
+    font-weight: 900;
+    font-style: normal;
+    font-display: auto;
+}
+
+@font-face {
+    font-family: "Source Code Pro";
+    src: url("/static/out/media/fonts/SourceCodePro-BlackIt.otf.woff2") format("woff2");
+    font-weight: 900;
+    font-style: italic;
+    font-display: auto;
+}

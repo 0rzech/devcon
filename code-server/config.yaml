@@ -1,0 +1,5 @@
+disable-update-check: true
+disable-telemetry: true
+enable-remote-storage: true
+auth: password
+password:
