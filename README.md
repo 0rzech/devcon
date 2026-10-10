@@ -1,6 +1,6 @@
 # DEVCON
 
-A containerized, batteries-included development environment. One image gives you a browser-based VS Code, an AI coding agent (Mistral Vibe), a curated shell, and language toolchains - all running as an unprivileged user inside an optional microVM.
+A containerized, batteries-included development environment. One image gives you a browser-based VS Code, an AI coding agent ([Goose](https://github.com/aaif-goose/goose)), a curated shell, and language toolchains - all running as an unprivileged user inside an optional microVM.
 
 ---
 
@@ -9,13 +9,20 @@ A containerized, batteries-included development environment. One image gives you
 DEVCON is a [Podman](https://podman.io/) container image that packages opinionated dev setup:
 
 * **Editor** - [code-server](https://github.com/coder/code-server) - text editor in the browser, with pre-configured settings
-* **AI agent** - [Mistral Vibe](https://github.com/mistralai/vibe) - a coding agent available as a CLI and as an ACP process wired into code-server
+* **AI agent** - [Goose](https://github.com/aaif-goose/goose) - a coding agent available as a CLI and as an ACP process wired into code-server
 * **Shell** - [fish](https://fishshell.com/) with vi keybindings and a custom two-line prompt
 * **Toolchains** - Rust and Dart/Flutter
 * **Utilities** - `bat`, `fd`, `rg`, `jq`, `tree`, PostgreSQL client libs etc.
 * **Extensions** - Pre-installed OpenVSX extensions for Python, Rust, Go, Dart, SQL (PostgreSQL/SQLite), TOML, YAML, SARIF etc.
 
 Hardened image: the root account is disabled and expired, and the container runs as an unprivileged user (`devcon`, UID 1000).
+
+### Goose configuration
+
+Goose is configured entirely through files in [`goose/`](goose/), copied into the image at `~/.config/goose/`:
+
+- **`config.yaml`** - sets `smart_approve` mode (tool calls below a risk threshold are auto-approved), high thinking effort, telemetry off, and the OS keyring disabled (`GOOSE_DISABLE_KEYRING: true`) so secrets are read from a plain `secrets.yaml` file instead. Enables the bundled `developer` (file editing + shell), `analyze`, `skills`, `summon`, `scheduler`, and `extensionmanager` extensions.
+- **`custom_providers/custom_mistral.json`** - a custom OpenAI-compatible provider pointing at the Mistral API (`https://api.mistral.ai/v1`), with `zai-glm-5-3`, `mistral-large-4`, and `mistral-medium` models. The active provider/model is `custom_mistral` / `zai-glm-5-3`, authenticated via the `MISTRAL_API_KEY` secret.
 
 ## Why
 
@@ -39,10 +46,12 @@ Create the following Podman secrets (names and values are examples):
 podman secret create some-git-user-name-secret   <<< "Your Name"
 podman secret create some-git-user-email-secret  <<< "you@example.com"
 podman secret create project-credentials         <<< "https://user:pat@github.com"
-podman secret create mistral-api-key             <<< "MISTRAL_API_KEY='your-mistral-api-key'"
+podman secret create mistral-api-key             <<< "MISTRAL_API_KEY: 'your-mistral-api-key'
 ```
 
-Mount bind them to appropriate in-container names: `git-user-name`, `git-user-email`, `/home/devcon/.config/git/credentials` and `/home/devcon/.config/vibe/.env`.
+Mount bind them to appropriate in-container names: `git-user-name`, `git-user-email`, `/home/devcon/.config/git/credentials` and `/home/devcon/.config/goose/secrets.yaml`.
+
+The last secret is mounted as Goose's `secrets.yaml`. Its value must be YAML (`MISTRAL_API_KEY: <key>`) because Goose reads the `MISTRAL_API_KEY` entry from that file - file-based secret storage is forced by `GOOSE_DISABLE_KEYRING: true` in `goose/config.yaml`, since there is no system keyring inside the container.
 
 ### 3. Configure and run
 
@@ -85,7 +94,7 @@ podman logs project
 
 or view them within [Podman Desktop](https://podman-desktop.io/).
 
-Then open the URL in your browser and log in with the password. Your project is already cloned and open in the editor sidebar, and Mistral Vibe is available in the chat panel.
+Then open the URL in your browser and log in with the password. Your project is already cloned and open in the editor sidebar, and Goose is available in the chat panel (it is registered as an ACP agent in `code-server/settings.json`, launched via `goose acp`).
 
 ## License
 

@@ -7,7 +7,6 @@ ARG GROUP_NAME='devcon'
 ARG GROUP_ID='1000'
 
 ARG USER_HOME="/home/${USER_NAME}"
-ARG VIBE_HOME="${USER_HOME}/.config/vibe"
 
 RUN <<EOF
   set -euo pipefail
@@ -136,7 +135,7 @@ RUN <<EOF
 
   # Prepare tool directories
 
-  mkdir --parent '/opt/flutter' '/opt/rust' '/opt/vibe/'{bin,uv}
+  mkdir --parent '/opt/flutter' '/opt/rust'
   chown --recursive "${USER_NAME}:${USER_NAME}" '/opt/flutter'
 
   # Install Rust toolchain
@@ -173,18 +172,20 @@ RUN <<EOF
   rm --recursive "$GNUPGHOME"
   unset GNUPGHOME
 
-  # Install Mistral Vibe
+  # Install Goose
 
-  vibe_install_log="/opt/vibe/install-log.txt"
-  touch "${vibe_install_log}"
-
-  UV_NO_MANAGED_PYTHON=1 \
-  UV_PYTHON_DOWNLOADS=never \
-  UV_NO_CACHE=1 \
-  UV_TOOL_BIN_DIR='/opt/vibe/bin' \
-  UV_TOOL_DIR='/opt/vibe/uv' \
-  PATH="${PATH}:/opt/vibe/bin" \
-    uv tool install "mistral-vibe>=2" 2>&1 | tee "${vibe_install_log}"
+  url_prefix='https://github.com/aaif-goose/goose/releases'
+  version="$(curl --fail --silent --show-error --location --head --output /dev/null --write-out "%{url_effective}" "${url_prefix}/latest")"
+  version="${version#${url_prefix}/tag/v}"
+  archive='goose-x86_64-unknown-linux-gnu.tar.gz'
+  url="${url_prefix}/download/v${version}/${archive}"
+  echo "Retrieving ${url}"
+  curl --proto '=https' --location --max-redirs 1 "${url}" --output "${archive}"
+  tar -xf "${archive}" --strip-components=1
+  dest='goose'
+  chmod --verbose +x "${dest}"
+  mv --verbose "${dest}" '/usr/local/bin/'
+  rm --verbose "${archive}"
 EOF
 
 COPY 'code-server/fonts' '/usr/lib/code-server/lib/vscode/out/media/fonts/'
@@ -193,9 +194,8 @@ COPY 'bin' '/usr/local/bin/'
 
 USER "${USER_NAME}"
 
-ENV PATH="${PATH}:/opt/flutter/bin:/opt/rust/bin:/opt/vibe/bin:${USER_HOME}/.cargo/bin:${USER_HOME}/.local/bin" \
+ENV PATH="${PATH}:/opt/flutter/bin:/opt/rust/bin:${USER_HOME}/.cargo/bin:${USER_HOME}/.local/bin" \
     HOME="${USER_HOME}" \
-    VIBE_HOME="${VIBE_HOME}" \
     UV_NO_MANAGED_PYTHON=1 \
     UV_PYTHON_DOWNLOADS=never \
     UV_NO_CACHE=1
@@ -213,7 +213,7 @@ EOF
 COPY --chown="${USER_ID}:${GROUP_ID}" 'fish' "${HOME}/.config/fish/"
 COPY --chown="${USER_ID}:${GROUP_ID}" 'code-server/config.yaml' "${HOME}/.config/code-server/"
 COPY --chown="${USER_ID}:${GROUP_ID}" 'code-server/settings.json' "${HOME}/.local/share/code-server/User/"
-COPY --chown="${USER_ID}:${GROUP_ID}" 'mistral-vibe/config.toml' "${VIBE_HOME}/"
+COPY --chown="${USER_ID}:${GROUP_ID}" 'goose' "${HOME}/.config/goose/"
 
 LABEL io.containers.capabilities=""
 

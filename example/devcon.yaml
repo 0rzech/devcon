@@ -39,7 +39,7 @@ services:
       - source: project-credentials
         target: /home/devcon/.config/git/credentials
       - source: mistral-api-key
-        target: /home/devcon/.config/vibe/.env
+        target: /home/devcon/.config/goose/secrets.yaml # example secret value: `MISTRAL_API_KEY: <key>`
     environment:
       DEVCON_GIT_REPO: 'https://github.com/user/project.git'
       DEVCON_WORK_DIR: 'project'

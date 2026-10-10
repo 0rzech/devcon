@@ -1,0 +1,59 @@
+{
+  "name": "custom_mistral",
+  "engine": "openai",
+  "display_name": "Mistral",
+  "description": "Mistral provider",
+  "api_key_env": "MISTRAL_API_KEY",
+  "base_url": "https://api.mistral.ai/v1",
+  "models": [
+    {
+      "name": "zai-glm-5-3",
+      "context_limit": 1000000,
+      "input_token_cost": 1.4,
+      "output_token_cost": 4.4,
+      "currency": "USD",
+      "supports_cache_control": null,
+      "reasoning": true
+    },
+    {
+      "name": "mistral-large-4",
+      "context_limit": 1000000,
+      "input_token_cost": 1.36,
+      "output_token_cost": 4.18,
+      "currency": "USD",
+      "supports_cache_control": null,
+      "reasoning": true
+    },
+    {
+      "name": "mistral-medium",
+      "context_limit": 1000000,
+      "input_token_cost": 1.5,
+      "output_token_cost": 7.5,
+      "currency": "USD",
+      "supports_cache_control": null,
+      "reasoning": true
+    }
+  ],
+  "headers": null,
+  "session_id_header_override": null,
+  "timeout_seconds": null,
+  "supports_streaming": true,
+  "requires_auth": true,
+  "catalog_provider_id": "mistralai",
+  "base_path": null,
+  "env_vars": null,
+  "auth": null,
+  "dynamic_models": false,
+  "skip_canonical_filtering": true,
+  "model_doc_link": "https://docs.mistral.ai/models",
+  "setup_steps": [],
+  "toolshim": false,
+  "preserves_thinking": true,
+  "emit_clear_thinking": false,
+  "setup": {
+    "category": "model",
+    "setup_method": "single_api_key",
+    "group": "default",
+    "docs_url": "https://console.mistral.ai/api-keys"
+  }
+}
