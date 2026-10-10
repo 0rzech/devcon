@@ -1,6 +1,6 @@
 # DEVCON
 
-A containerized, batteries-included development environment. One image gives you a browser-based VS Code, an AI coding agent (Mistral Vibe), a curated shell, and language toolchains — all running as an unprivileged user inside an optional microVM.
+A containerized, batteries-included development environment. One image gives you a browser-based VS Code, an AI coding agent ([Goose](https://github.com/aaif-goose/goose)), a curated shell, and language toolchains — all running as an unprivileged user inside an optional microVM.
 
 ---
 
@@ -11,7 +11,7 @@ DEVCON is a [Podman](https://podman.io/) container image that packages a complet
 | Layer | What's inside |
 |---|---|
 | **Editor** | [code-server](https://github.com/coder/code-server) — VS Code in the browser, with a pre-configured settings profile (vim keybindings, ligature fonts, Selenized Light theme, format-on-save, relative line numbers) |
-| **AI agent** | [Mistral Vibe](https://github.com/mistralai/vibe) — a CLI coding agent, wired into code-server via the ACP protocol so it appears as a chat panel inside the editor |
+| **AI agent** | [Goose](https://github.com/aaif-goose/goose) — an open-source AI coding agent, wired into code-server via the ACP protocol (`goose acp`) so it appears as a chat panel inside the editor |
 | **Shell** | [fish](https://fishshell.com/) with vi keybindings, a custom two-line prompt (git status, venv, battery, background jobs), and convenience aliases |
 | **Toolchains** | Rust (rustc, cargo, rustfmt, clippy, rust-src), Flutter/Dart SDK, Go, Python (via `uv`), C/C++ (clang, cmake, lld, lldb) |
 | **Utilities** | `bat`, `fd`, `rg`, `jq`, `tree`, PostgreSQL client libs, and more |
@@ -19,13 +19,20 @@ DEVCON is a [Podman](https://podman.io/) container image that packages a complet
 
 The image is built from `quay.io/fedora/fedora-minimal` and hardened: the root account is disabled and expired, and the container runs as an unprivileged user (`devcon`, UID 1000).
 
+### Goose configuration
+
+Goose is configured entirely through files in [`goose/`](goose/), copied into the image at `~/.config/goose/`:
+
+- **`config.yaml`** — sets `smart_approve` mode (tool calls below a risk threshold are auto-approved), high thinking effort, telemetry off, and the OS keyring disabled (`GOOSE_DISABLE_KEYRING: true`) so secrets are read from a plain `secrets.yaml` file instead. Enables the bundled `developer` (file editing + shell), `analyze`, `skills`, `summon`, `scheduler`, and `extensionmanager` extensions.
+- **`custom_providers/custom_mistral.json`** — a custom OpenAI-compatible provider pointing at the Mistral API (`https://api.mistral.ai/v1`), with `zai-glm-5-3`, `mistral-large-4`, and `mistral-medium` models. The active provider/model is `custom_mistral` / `zai-glm-5-3`, authenticated via the `MISTRAL_API_KEY` secret.
+
 ## Why
 
 - **Isolated.** On Linux, the example compose file runs the container inside a [krun](https://github.com/containers/libkrun) microVM (`runtime: krun`), so your host is never exposed to container processes.
 - **Reproducible.** The entire environment — editor, shell, toolchains, extensions, agent, settings — is defined in one `Containerfile`. No "works on my machine."
 - **Secrets stay out of the image.** Git credentials, your git identity, and the Mistral API key are injected at runtime via Podman secrets, not baked in.
-- **AI-assisted by default.** Mistral Vibe is pre-configured and surfaced inside code-server, so you can chat with an agent that has full access to your project files and terminal.
-- **Opinionated defaults.** Every setting (editor, shell, agent permissions) lives in plain config files under `code-server/`, `fish/`, and `mistral-vibe/` — fork and tweak freely.
+- **AI-assisted by default.** Goose is pre-configured and surfaced inside code-server, so you can chat with an agent that has full access to your project files and terminal.
+- **Opinionated defaults.** Every setting (editor, shell, agent) lives in plain config files under `code-server/`, `fish/`, and `goose/` — fork and tweak freely.
 
 ## How
 
@@ -45,10 +52,12 @@ Create the following Podman secrets (names and values are examples):
 podman secret create some-git-user-name-secret   <<< "Your Name"
 podman secret create some-git-user-email-secret  <<< "you@example.com"
 podman secret create project-credentials         <<< "https://user:pat@github.com"
-podman secret create mistral-api-key             <<< "MISTRAL_API_KEY='your-mistral-api-key'"
+podman secret create mistral-api-key             <<< "MISTRAL_API_KEY: 'your-mistral-api-key'
 ```
 
-Mount bind them to appropriate in-container names: `git-user-name`, `git-user-email`, `/home/devcon/.config/git/credentials` and `/home/devcon/.config/vibe/.env`.
+Mount bind them to appropriate in-container names: `git-user-name`, `git-user-email`, `/home/devcon/.config/git/credentials` and `/home/devcon/.config/goose/secrets.yaml`.
+
+The last secret is mounted as Goose's `secrets.yaml`. Its value must be YAML (`MISTRAL_API_KEY: <key>`) because Goose reads the `MISTRAL_API_KEY` entry from that file — file-based secret storage is forced by `GOOSE_DISABLE_KEYRING: true` in `goose/config.yaml`, since there is no system keyring inside the container.
 
 ### 3. Configure and run
 
@@ -93,7 +102,7 @@ podman logs project
 
 or view them within [Podman Desktop](https://podman-desktop.io/).
 
-Then open the URL in your browser and log in with the password. Your project is already cloned and open in the editor sidebar, and Mistral Vibe is available in the chat panel.
+Then open the URL in your browser and log in with the password. Your project is already cloned and open in the editor sidebar, and Goose is available in the chat panel (it is registered as an ACP agent in `code-server/settings.json`, launched via `goose acp`).
 
 ---
 
@@ -106,7 +115,7 @@ Then open the URL in your browser and log in with the password. Your project is 
 │   ├── devcon.yaml          # podman-compose file (edit for your project)
 │   └── devcon.env           # environment variables for the entrypoint (edit for your project)
 ├── fish/                    # fish shell config (prompt, aliases, vi mode)
-├── mistral-vibe/            # Mistral Vibe agent configuration
+├── goose/                   # Goose agent configuration
 ├── build                    # helper script: podman build -t devcon .
 └── Containerfile            # image definition
 ```

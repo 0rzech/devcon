@@ -15,9 +15,9 @@
     "editor.wordBasedSuggestions": "off"
   },
   "acp.agents": {
-    "Mistral Vibe": {
-      "args": [],
-      "command": "vibe-acp",
+    "Goose": {
+      "args": ["acp"],
+      "command": "goose",
       "env": {}
     }
   },
