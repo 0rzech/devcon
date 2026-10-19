@@ -21,6 +21,7 @@ RUN <<EOF
     ccache \
     clang \
     cmake \
+    diff \
     fd-find \
     file \
     fish \
