@@ -1,0 +1,49 @@
+# replace 'project' with your project name
+# replace 'user:pat' with your user name and personal access token (PAT)
+# run this file with podman-compose -f <path>/devcon.yaml up -d
+services:
+  project:
+    runtime: krun # usable on Linux; starts DEVCON container in a krun microvm
+    image: localhost/devcon:latest
+    annotations:
+      krun.cpus: 2
+      krun.ram_mib: 8192
+    security_opt:
+      - no-new-privileges=true
+    init: true # handles signals nicely and reaps processes properly
+    secrets:
+      - source: some-git-user-name-secret
+        target: git-user-name # mandatory name
+      - source: some-git-user-email-secret
+        target: git-user-email # mandatory name
+      - source: project-credentials
+        target: /home/devcon/.config/git/credentials
+      - source: mistral-api-key
+        target: /home/devcon/.config/vibe/.env
+    environment:
+      DEVCON_USE_PROXY: '1' # needed for Dart and Flutter network calls to work inside the microvm
+      DEVCON_GIT_REPO: 'https://github.com/user/project.git'
+      DEVCON_WORK_DIR: 'project'
+    env_file:
+      - ./devcon.env
+    volumes: # optional
+      - home:/home/devcon
+    ports:
+      - '127.0.0.1:8000:8000'
+    command: >
+      code-server
+      --bind-addr 0.0.0.0:8000
+      --app-name project
+
+volumes:
+  home:
+
+secrets:
+  some-git-user-name-secret:
+    external: true
+  some-git-user-email-secret:
+    external: true
+  project-credentials: # example secret value: https://user:pat@github.com
+    external: true
+  mistral-api-key:
+    external: true
