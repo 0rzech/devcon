@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source '/usr/local/lib/proxy-env.bash'
+
+exec '/opt/flutter/bin/flutter-dev' "${@}"
