@@ -200,7 +200,8 @@ EOF
 
 COPY 'code-server/fonts' '/usr/lib/code-server/lib/vscode/out/media/fonts/'
 COPY 'code-server/css' '/usr/lib/code-server/lib/vscode/out/media/css/'
-COPY 'entrypoint' '/usr/local/bin/'
+COPY 'lib' '/usr/local/lib/'
+COPY 'bin' '/usr/local/bin/'
 
 USER "${USER_NAME}"
 
