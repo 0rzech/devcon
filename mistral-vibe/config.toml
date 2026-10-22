@@ -6,7 +6,7 @@ allowed_models = [
 ]
 default_agent = "smart-approve"
 bypass_tool_permissions = false
-enable_system_trust_store = false
+enable_system_trust_store = true
 otel_redaction = "strict"
 enable_telemetry = false
 include_commit_signature = false
