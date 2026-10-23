@@ -1,13 +1,33 @@
-# replace 'project' with your project name
-# replace 'user:pat' with your user name and personal access token (PAT)
-# run this file with podman-compose -f <path>/devcon.yaml up -d
+# Replace 'project' with your project name and 'user:pat' with your user name and personal access token (PAT).
+# Run this file with `podman-compose -f <path>/devcon.yaml up -d`.
+#
+# Currently, Dart and Flutter network calls fail when using krun Transparent Socket Impersonation (TSI).
+# This *may* be fixed with https://github.com/libkrun/libkrun/releases/tag/v1.19.7 release.
+#
+# There is no such problem with passt/pasta, which currently won't work either until an update is released
+# with https://github.com/containers/crun/pull/2334 fix for https://github.com/containers/crun/issues/2283.
+# The workaround is to place the following wrapper script in "${HOME}/.local/bin" directory:
+#
+# ```bash
+# #!/usr/bin/env bash
+#
+# set -euo pipefail
+#
+# if [[ -d '/proc' ]]; then
+#   exec unshare --mount-proc '/usr/bin/passt' "${@}"
+# else
+#   exec '/usr/bin/passt' "${@}"
+# fi
+# ```
 services:
   project:
-    runtime: krun # usable on Linux; starts DEVCON container in a krun microvm
     image: localhost/devcon:latest
+    runtime: krun # usable on Linux; starts DEVCON container in a krun microvm
     annotations:
       krun.cpus: 2
       krun.ram_mib: 8192
+      krun.use_passt: 1 # needed for Dart and Flutter network calls to work inside the microvm
+    network_mode: pasta # needed for passt to work with krun
     security_opt:
       - no-new-privileges=true
     init: true # handles signals nicely and reaps processes properly
@@ -21,7 +41,6 @@ services:
       - source: mistral-api-key
         target: /home/devcon/.config/vibe/.env
     environment:
-      DEVCON_USE_PROXY: '1' # needed for Dart and Flutter network calls to work inside the microvm
       DEVCON_GIT_REPO: 'https://github.com/user/project.git'
       DEVCON_WORK_DIR: 'project'
     env_file:

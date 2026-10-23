@@ -2,11 +2,6 @@
 
 set -euo pipefail
 
-if [[ '0' != "${DEVCON_USE_PROXY:-0}" ]]; then
-  echo 'Starting tinyproxy'
-  tinyproxy -c '/etc/tinyproxy/tinyproxy.conf'
-fi
-
 if [[ ! -e "${HOME}/.skel" ]]; then
   echo 'Copying skel'
   cp --recursive --verbose '/etc/skel/.' "${HOME}"

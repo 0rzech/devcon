@@ -14,7 +14,7 @@ DEVCON is a [Podman](https://podman.io/) container image that packages a complet
 | **AI agent** | [Mistral Vibe](https://github.com/mistralai/vibe) — a CLI coding agent, wired into code-server via the ACP protocol so it appears as a chat panel inside the editor |
 | **Shell** | [fish](https://fishshell.com/) with vi keybindings, a custom two-line prompt (git status, venv, battery, background jobs), and convenience aliases |
 | **Toolchains** | Rust (rustc, cargo, rustfmt, clippy, rust-src), Flutter/Dart SDK, Go, Python (via `uv`), C/C++ (clang, cmake, lld, lldb) |
-| **Utilities** | `bat`, `fd`, `rg`, `jq`, `tree`, `tinyproxy`, PostgreSQL client libs, and more |
+| **Utilities** | `bat`, `fd`, `rg`, `jq`, `tree`, PostgreSQL client libs, and more |
 | **Extensions** | Pre-installed VS Code extensions for Python, Rust, Go, Dart, SQL (PostgreSQL/SQLite), TOML, YAML, SARIF, and more |
 
 The image is built from `quay.io/fedora/fedora-minimal` and hardened: the root account is disabled and expired, and the container runs as an unprivileged user (`devcon`, UID 1000).
@@ -54,72 +54,15 @@ Mount bind them to appropriate in-container names: `git-user-name`, `git-user-em
 
 Copy the files in [`example/`](example/) and edit them for your project.
 
-**`example/devcon.env`** — environment variables consumed by the container entrypoint:
+**[`example/devcon.env`](example/devcon.env)** — environment variables consumed by the container entrypoint.
 
-```sh
-DEVCON_BASE_URL='http://localhost:8000/'
-```
-
-**`example/devcon.yaml`** — a `podman-compose` file that starts the container:
-
-```yaml
-# replace 'project' with your project name
-# replace 'user:pat' with your user name and personal access token (PAT)
-# run this file with podman-compose -f <path>/devcon.yaml up -d
-services:
-  project:
-    runtime: krun # usable on Linux; starts DEVCON container in a krun microvm
-    image: localhost/devcon:latest
-    annotations:
-      krun.cpus: 2
-      krun.ram_mib: 8192
-    security_opt:
-      - no-new-privileges=true
-    init: true # handles signals nicely and reaps processes properly
-    secrets:
-      - source: some-git-user-name-secret
-        target: git-user-name # mandatory name
-      - source: some-git-user-email-secret
-        target: git-user-email # mandatory name
-      - source: project-credentials
-        target: /home/devcon/.config/git/credentials
-      - source: mistral-api-key
-        target: /home/devcon/.config/vibe/.env
-    environment:
-      DEVCON_USE_PROXY: '1' # needed for Dart and Flutter network calls to work inside the microvm
-      DEVCON_GIT_REPO: 'https://github.com/user/project.git'
-      DEVCON_WORK_DIR: 'project'
-    env_file:
-      - ./devcon.env
-    volumes: # optional
-      - home:/home/devcon
-    ports:
-      - '127.0.0.1:8000:8000'
-    command: >
-      code-server
-      --bind-addr 0.0.0.0:8000
-      --app-name project
-
-volumes:
-  home:
-
-secrets:
-  some-git-user-name-secret:
-    external: true
-  some-git-user-email-secret:
-    external: true
-  project-credentials: # example secret value: https://user:pat@github.com
-    external: true
-  mistral-api-key:
-    external: true
-```
+**[`example/devcon.yaml`](example/devcon.yaml)** — a `podman-compose` file that starts the container.
 
 Key points:
 
 - **`runtime: krun`** — runs the container inside a lightweight microVM for hardware-level isolation (Linux only).
 - **`secrets`** — four secrets are mounted into the container at startup. The entrypoint reads them to configure git identity, git credential helper, and the Mistral Vibe API key.
 - **`DEVCON_GIT_REPO` / `DEVCON_WORK_DIR`** — the entrypoint clones this repo into `~/project` on the first start.
-- **`DEVCON_USE_PROXY: '1'`** — starts tinyproxy inside the container so Dart/Flutter network calls work correctly inside the microVM.
 - **`ports`** — code-server is bound to `127.0.0.1:8000` on the host; nothing is exposed externally. Host-side port number is of your choice.
 
 Start it:
@@ -157,17 +100,15 @@ Then open the URL in your browser and log in with the password. Your project is 
 ## Repository layout
 
 ```
-├── Containerfile            # image definition
-├── build                    # helper script: podman build -t devcon .
-├── entrypoint               # container startup script (proxy, git config, clone, password)
+├── bin/entrypoint           # container startup script (git config, clone, password)
 ├── code-server/             # code-server config, settings, fonts
-├── fish/                    # fish shell config (prompt, aliases, vi mode)
-├── mistral-vibe/            # Mistral Vibe agent configuration
 ├── example/
 │   ├── devcon.yaml          # podman-compose file (edit for your project)
 │   └── devcon.env           # environment variables for the entrypoint (edit for your project)
-├── LICENSE                  # Apache 2.0
-└── NOTICE                   # attribution
+├── fish/                    # fish shell config (prompt, aliases, vi mode)
+├── mistral-vibe/            # Mistral Vibe agent configuration
+├── build                    # helper script: podman build -t devcon .
+└── Containerfile            # image definition
 ```
 
 ## License
