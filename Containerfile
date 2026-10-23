@@ -39,7 +39,6 @@ RUN <<EOF
     python \
     ripgrep \
     tar \
-    tinyproxy \
     tree \
     unzip \
     uv \
@@ -60,16 +59,6 @@ RUN <<EOF
   chown --recursive --verbose "${USER_ID}:${GROUP_ID}" "${USER_HOME}"
   groupadd --gid "${GROUP_ID}" "${GROUP_NAME}"
   useradd --uid "${USER_ID}" --gid "${GROUP_ID}" --home "${USER_HOME}" "${USER_NAME}"
-
-  # Configure tinyproxy
-
-  sed -i "s|^User tinyproxy|User ${USER_NAME}|" '/etc/tinyproxy/tinyproxy.conf'
-  sed -i "s|^Group tinyproxy|Group ${USER_NAME}|" '/etc/tinyproxy/tinyproxy.conf'
-  sed -i 's|^#LogFile "|LogFile "|' '/etc/tinyproxy/tinyproxy.conf'
-  sed -i 's|^LogLevel Info|LogLevel Warning|' '/etc/tinyproxy/tinyproxy.conf'
-  sed -i 's|^MaxClients [0-9]*|MaxClients 5|' '/etc/tinyproxy/tinyproxy.conf' # hopefully to be removed once https://github.com/libkrun/libkrun/pull/891 is released
-  mkdir '/var/log/tinyproxy'
-  chown "${USER_NAME}:${GROUP_NAME}" '/var/log/tinyproxy'
 
   # Install code-server
 
@@ -200,7 +189,6 @@ EOF
 
 COPY 'code-server/fonts' '/usr/lib/code-server/lib/vscode/out/media/fonts/'
 COPY 'code-server/css' '/usr/lib/code-server/lib/vscode/out/media/css/'
-COPY 'lib' '/usr/local/lib/'
 COPY 'bin' '/usr/local/bin/'
 
 USER "${USER_NAME}"
