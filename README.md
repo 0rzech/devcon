@@ -45,7 +45,7 @@ Create the following Podman secrets (names and values are examples):
 podman secret create some-git-user-name-secret   <<< "Your Name"
 podman secret create some-git-user-email-secret  <<< "you@example.com"
 podman secret create project-credentials         <<< "https://user:pat@github.com"
-podman secret create mistral-api-key             <<< "your-mistral-api-key"
+podman secret create mistral-api-key             <<< "MISTRAL_API_KEY='your-mistral-api-key'"
 ```
 
 Mount bind them to appropriate in-container names: `git-user-name`, `git-user-email`, `/home/devcon/.config/git/credentials` and `/home/devcon/.config/vibe/.env`.
